@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  backend-api:
+    build:
+      context: .
+      dockerfile: Backend.Api/Dockerfile
+    container_name: backend-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    # Equalized resources
+    cpus: "1.0"
+    mem_limit: 512m
+
+  ocelot-gateway:
+    build:
+      context: .
+      dockerfile: OcelotGateway/Dockerfile
+    container_name: ocelot-gateway
+    depends_on:
+      - backend-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    cpus: "1.0"
+    mem_limit: 512m
+
+  yarp-gateway:
+    build:
+      context: .
+      dockerfile: YarpGateway/Dockerfile
+    container_name: yarp-gateway
+    depends_on:
+      - backend-api
+    ports:
+      - "8001:8001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    cpus: "1.0"
+    mem_limit: 512m
+
+  # Optional: k6 benchmark runner (only starts with --profile bench)
+  k6:
+    image: grafana/k6:0.52.0
+    profiles: ["bench"]
+    depends_on:
+      - backend-api
+      - ocelot-gateway
+      - yarp-gateway
+    volumes:
+      - ./k6:/scripts
+    working_dir: /scripts
+    environment:
+      - OCELOT_URL=http://ocelot-gateway:8000/api/test
+      - YARP_URL=http://yarp-gateway:8001/api/test
+      - K6_SUMMARY_EXPORT=/scripts/summary.json
+    entrypoint: ["k6", "run", "/scripts/benchmark.js"]

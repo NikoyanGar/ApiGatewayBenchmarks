@@ -1,0 +1,172 @@
+{
+    "metrics": {
+        "data_received": {
+            "count": 3437618,
+            "rate": 32741.096816250934
+        },
+        "http_req_blocked": {
+            "med": 0.0023,
+            "max": 11.664197,
+            "p(90)": 0.0049,
+            "p(95)": 0.009000149999999997,
+            "avg": 0.004823365040560302,
+            "min": 0.0013
+        },
+        "http_req_waiting": {
+            "min": 0.45553,
+            "med": 0.7902115000000001,
+            "max": 69.406876,
+            "p(90)": 1.5230352000000003,
+            "p(95)": 3.3154002999999856,
+            "avg": 1.0650130445605026
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 1.159139631236811,
+            "min": 0.514734,
+            "med": 0.8638669999999999,
+            "max": 72.161023,
+            "p(90)": 1.6370933,
+            "p(95)": 3.5980851999999874
+        },
+        "http_req_sending": {
+            "avg": 0.03325706200688962,
+            "min": 0.004701,
+            "med": 0.027502,
+            "max": 0.428507,
+            "p(90)": 0.051705,
+            "p(95)": 0.115408
+        },
+        "http_req_duration": {
+            "min": 0.514734,
+            "med": 0.8638669999999999,
+            "max": 72.161023,
+            "p(90)": 1.6370933,
+            "p(95)": 3.5980851999999874,
+            "avg": 1.159139631236811
+        },
+        "http_req_tls_handshaking": {
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0
+        },
+        "iteration_duration": {
+            "p(95)": 3.965696649999996,
+            "avg": 1.2804504882764731,
+            "min": 0.574638,
+            "med": 0.956061,
+            "max": 84.437231,
+            "p(90)": 1.8099978000000003
+        },
+        "vus": {
+            "value": 0,
+            "min": 0,
+            "max": 2
+        },
+        "http_req_failed{gateway:yarp}": {
+            "passes": 0,
+            "fails": 8999,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_receiving": {
+            "p(95)": 0.15526899999999913,
+            "avg": 0.060869524669407656,
+            "min": 0.014301,
+            "med": 0.046003,
+            "max": 2.513243,
+            "p(90)": 0.095706
+        },
+        "http_req_failed{gateway:ocelot}": {
+            "passes": 0,
+            "fails": 8999,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "data_sent": {
+            "count": 1655816,
+            "rate": 15770.580665419297
+        },
+        "iterations": {
+            "count": 17998,
+            "rate": 171.4193550589054
+        },
+        "vus_max": {
+            "value": 40,
+            "min": 40,
+            "max": 40
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 17998,
+            "value": 0
+        },
+        "ocelot_latency": {
+            "max": 60.940843,
+            "p(90)": 1.6218558,
+            "p(95)": 3.3903414000000107,
+            "avg": 1.1878486218468742,
+            "min": 0.592761,
+            "med": 0.908894,
+            "thresholds": {
+                "p(95)<50": false
+            }
+        },
+        "yarp_latency": {
+            "max": 72.161023,
+            "p(90)": 1.6717303999999997,
+            "p(95)": 3.8089423000000013,
+            "avg": 1.1304306406267424,
+            "min": 0.514734,
+            "med": 0.795547,
+            "thresholds": {
+                "p(95)<50": false
+            }
+        },
+        "http_req_connecting": {
+            "med": 0,
+            "max": 0.812014,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.000755916379597733,
+            "min": 0
+        },
+        "http_reqs": {
+            "count": 17998,
+            "rate": 171.4193550589054
+        },
+        "checks": {
+            "passes": 17998,
+            "fails": 0,
+            "value": 1
+        }
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "status is 200 (yarp)": {
+                    "id": "360881e99a05da1348722e3195b23c16",
+                    "passes": 8999,
+                    "fails": 0,
+                    "name": "status is 200 (yarp)",
+                    "path": "::status is 200 (yarp)"
+                },
+                "status is 200 (ocelot)": {
+                    "fails": 0,
+                    "name": "status is 200 (ocelot)",
+                    "path": "::status is 200 (ocelot)",
+                    "id": "f46c8a51c3f0c694fc5d38fe7ecae7b0",
+                    "passes": 8999
+                }
+            }
+    }
+}
