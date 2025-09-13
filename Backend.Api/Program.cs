@@ -10,14 +10,13 @@ namespace Backend.Api
 
             // Add services to the container.
             builder.Services.AddControllers();
-            builder.Services.AddOpenApi(); // OpenAPI document
+
             builder.Services.AddSwaggerGen();
             var app = builder.Build();
 
             // Swagger/OpenAPI (enable in Development and Docker)
             if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
             {
-                app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
@@ -27,8 +26,6 @@ namespace Backend.Api
             {
                 app.UseHttpsRedirection();
             }
-
-            app.UseAuthorization();
 
             app.MapControllers();
 

@@ -10,7 +10,6 @@ namespace YarpGateway
                 .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
             builder.Services.AddControllers();
-            builder.Services.AddOpenApi();
             builder.Services.AddSwaggerGen();
             var app = builder.Build();
 
@@ -18,7 +17,6 @@ namespace YarpGateway
 
             if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
             {
-                app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
@@ -27,8 +25,6 @@ namespace YarpGateway
             {
                 app.UseHttpsRedirection();
             }
-
-            app.UseAuthorization();
 
             app.MapControllers();
 

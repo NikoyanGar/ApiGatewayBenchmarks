@@ -13,14 +13,12 @@ namespace OcelotGateway
             builder.Services.AddOcelot();
 
             builder.Services.AddControllers();
-            builder.Services.AddOpenApi();
             builder.Services.AddSwaggerGen();
             var app = builder.Build();
 
             // Swagger/OpenAPI (enable in Development and Docker)
             if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
             {
-                app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
@@ -30,7 +28,6 @@ namespace OcelotGateway
                 app.UseHttpsRedirection();
             }
 
-            app.UseAuthorization();
             app.MapControllers();
 
             // Place Ocelot at the end so Swagger/UI routes work
