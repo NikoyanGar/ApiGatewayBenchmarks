@@ -1,0 +1,16 @@
+{
+  "name": "node-gateway",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@fastify/http-proxy": "^9",
+    "fastify": "^4"
+  },
+  "devDependencies": {
+    "eslint": "^9.35.0"
+  }
+}

@@ -42,6 +42,21 @@ services:
     cpus: "1.0"
     mem_limit: 512m
 
+  node-gateway:
+    build:
+      context: .
+      dockerfile: NodeGateway/Dockerfile
+    container_name: node-gateway
+    depends_on:
+      - backend-api
+    ports:
+      - "8002:8002"
+    environment:
+      - PORT=8002
+      - UPSTREAM=http://backend-api:8080/api   # include /api here
+    cpus: "1.0"
+    mem_limit: 512m
+
   # Optional: k6 benchmark runner (only starts with --profile bench)
   k6:
     image: grafana/k6:0.52.0
@@ -50,11 +65,13 @@ services:
       - backend-api
       - ocelot-gateway
       - yarp-gateway
+      - node-gateway
     volumes:
       - ./k6:/scripts
     working_dir: /scripts
     environment:
       - OCELOT_URL=http://ocelot-gateway:8000/api/test
       - YARP_URL=http://yarp-gateway:8001/api/test
+      - FAST_URL=http://node-gateway:8002/api/test
       - K6_SUMMARY_EXPORT=/scripts/summary.json
     entrypoint: ["k6", "run", "/scripts/benchmark.js"]

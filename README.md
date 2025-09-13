@@ -1,9 +1,9 @@
-# API Gateway Benchmarks (.NET 9): YARP vs Ocelot
+﻿# API Gateway Benchmarks (.NET 9): YARP vs Ocelot vs Node (Fastify)
 
-This repository runs a simple Backend API behind two gateways (YARP and Ocelot) and provides a k6 load test to benchmark them sequentially under maximum pressure.
+This repository runs a simple Backend API behind three gateways (YARP, Ocelot, and a Node.js Fastify proxy) and provides a k6 load test to benchmark them sequentially under the same load.
 
 - Runtime: .NET 9
-- Gateways: YARP Reverse Proxy, Ocelot
+- Gateways: YARP Reverse Proxy, Ocelot, Node.js (Fastify + @fastify/http-proxy)
 - Orchestration: Docker Compose
 - Load testing: k6 (Grafana)
 
@@ -15,12 +15,12 @@ This repository runs a simple Backend API behind two gateways (YARP and Ocelot) 
   - YARP configured to forward /api/* to Backend.
 - OcelotGateway
   - Ocelot configured to forward /api/* to Backend.
+- NodeGateway
+  - Fastify reverse proxy forwarding /api/* to Backend.
 - k6
-  - Benchmark script driving sequential runs: first YARP, then Ocelot.
+  - Benchmark script driving sequential runs: YARP ➜ Ocelot ➜ Node.
 
-All containers run HTTP (no TLS) and expose Swagger at /swagger.
-
-## Project Structure
+All containers run HTTP (no TLS) and expose Swagger at /swagger (gateways only for .NET projects).
 
 ## Prerequisites
 
@@ -35,17 +35,17 @@ All containers run HTTP (no TLS) and expose Swagger at /swagger.
 
 2) Verify endpoints
 - Backend: http://localhost:8080/api/test
-- YARP via gateway: http://localhost:8001/api/test
-- Ocelot via gateway: http://localhost:8000/api/test
+- YARP:    http://localhost:8001/api/test
+- Ocelot:  http://localhost:8000/api/test
+- Node:    http://localhost:8002/api/test
 
-3) Open Swagger
-- Backend: http://localhost:8080/swagger
-- YARP: http://localhost:8001/swagger
+3) Open Swagger (YARP/Ocelot)
+- YARP:   http://localhost:8001/swagger
 - Ocelot: http://localhost:8000/swagger
 
-## k6 Benchmark (Sequential, Max Pressure)
+## Run the k6 Benchmark (Sequential)
 
-The script runs YARP first, then Ocelot, with tunable peak load and VU pool.
+The script runs YARP ➜ Ocelot ➜ Node, with tunable RPS and VU pool.
 
 Run inside compose (recommended):
 - docker compose --profile bench run --rm \
@@ -53,10 +53,10 @@ Run inside compose (recommended):
 
 Defaults (override via env):
 - MAX_RPS: peak target RPS (default 2000)
-- WARMUP_RPS: warmup target (default 10% of MAX_RPS, min 50)
+- WARMUP_RPS: warmup target (default max(50, 10% of MAX_RPS))
 - PRE_VUS: pre-allocated VUs (default 200)
 - MAX_VUS: max VUs (default max(1000, MAX_RPS*2))
-- GAP_SEC: pause between YARP and Ocelot phases (default 5)
+- GAP_SEC: pause between phases (default 5s)
 
 URLs when running k6:
 - In compose (auto): OCELOT_URL=http://ocelot-gateway:8000/api/test, YARP_URL=http://yarp-gateway:8001/api/test
@@ -69,35 +69,38 @@ URLs when running k6:
 
 Outputs:
 - Console summary
-- JSON summary exported to k6/summary.json (compose profile sets K6_SUMMARY_EXPORT)
+- JSON summary exported to k6/summary.json (via K6_SUMMARY_EXPORT)
+
+## Running k6 Outside Compose
+
+Use host URLs and pass environment variables:
 
 ## Fair Comparison
 
-- All services use equalized container resources (cpus: 1, mem_limit: 512m in docker-compose.yml).
+- All services use equalized container resources (cpus: "1.0", mem_limit: 512m in docker-compose.yml).
 - Scenarios are strictly sequential to avoid cross-interference.
-- Backend returns a small JSON payload; keep it stateless and avoid external I/O.
+- Backend returns a tiny JSON payload to minimize downstream variability.
 
 ## Troubleshooting
 
-- 308 redirects in containers:
-  - HTTPS redirection is disabled when ASPNETCORE_ENVIRONMENT=Docker to avoid TLS issues.
-- Gateway routing not hit:
-  - Ocelot: UseOcelot is placed after MapSwaggerUI and MapControllers so Swagger works.
-  - Verify OcelotGateway/ocelot.json is copied to output (csproj uses <Content Update="ocelot.json" ...>).
+- Desired rate not reached / dropped iterations:
+  - Increase MAX_VUS (and possibly PRE_VUS) until k6 sustains the target RPS.
 - Running k6 locally against containers:
   - Use host.docker.internal instead of localhost for gateway URLs.
-- Desired rate not reached:
-  - Increase MAX_VUS and possibly PRE_VUS until k6 sustains the target RPS.
+- Ocelot routing not hit:
+  - Ensure ocelot.json is included in publish output; in this repo it is copied by default.
+- NodeGateway image fails on npm ci (missing lockfile):
+  - Generate lockfile once in NodeGateway folder:
+    - PowerShell (temporary): 
+      - Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+      - npm install
+    - Or without changing policy:
+      - cmd /c "npm install"
+      - or "C:\Program Files\nodejs\npm.cmd" install
+    - Commit NodeGateway/package-lock.json, then rebuild:
+      - docker compose build node-gateway --no-cache
+  - Alternatively, switch the Dockerfile install step to npm install (non-deterministic) if a lockfile is not desired.
 
 ## Useful Commands
 
-- Build and run: docker compose up --build -d
-- Tail logs: docker compose logs -f
-- Re-run k6 only: docker compose --profile bench run --rm k6
-- Stop all: docker compose down -v
-
-## Notes
-
-- .NET 9 minimal hosting model is used across projects.
-- Swagger UI is enabled in Development and Docker environments for all services.
-- YARP route is configured via appsettings.json; Ocelot via ocelot.json
+- Build and run all:
