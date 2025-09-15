@@ -104,3 +104,18 @@ Use host URLs and pass environment variables:
 ## Useful Commands
 
 - Build and run all:
+
+# Build everything
+docker compose build --parallel
+
+# Start APIs
+docker compose up -d backend-api ocelot-gateway yarp-gateway node-gateway
+
+# Start k6 as part of the compose stack (not a one-off)
+docker compose --profile bench up --abort-on-container-exit k6
+# Ctrl+C to stop logs; k6 will exit when the run finishes
+
+
+
+docker compose --profile bench run --rm \
+  -e MAX_RPS=2000 -e PRE_VUS=300 -e MAX_VUS=4000 k6
